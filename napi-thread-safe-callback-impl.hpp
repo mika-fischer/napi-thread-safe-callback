@@ -120,8 +120,14 @@ inline ThreadSafeCallback::ThreadSafeCallback(Napi::FunctionReference&& callback
 {}
 
 inline ThreadSafeCallback::ThreadSafeCallback(Napi::ObjectReference&& receiver, Napi::FunctionReference&& callback)
-    : impl(new Impl(std::move(receiver), std::move(callback)))
-{}
+    : impl(nullptr)
+{
+    if (!receiver.IsEmpty() && !receiver.Value().IsObject())
+        throw Napi::Error::New(callback.Env(), "Callback receiver must be an Object");
+    if (callback.IsEmpty() || !callback.Value().IsFunction())
+        throw Napi::Error::New(callback.Env(), "Callback must be a Function");
+    impl = new Impl(std::move(receiver), std::move(callback));
+}
 
 inline ThreadSafeCallback::ThreadSafeCallback(ThreadSafeCallback&& other)
 : impl(other.impl)
