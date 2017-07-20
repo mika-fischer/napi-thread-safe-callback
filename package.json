@@ -6,8 +6,8 @@
   "scripts": {
     "test": "npm run test-rebuild && npm run test-run",
     "test-build": "node-gyp build --directory test",
-    "test-configure": "node-gyp configure --directory test",
-    "test-rebuild": "node-gyp rebuild --directory test",
+    "test-configure": "node-gyp configure --directory test --debug",
+    "test-rebuild": "node-gyp rebuild --directory test --debug",
     "test-run": "cross-env NODE_OPTIONS=--napi-modules mocha --reporter spec"
   },
   "keywords": [
