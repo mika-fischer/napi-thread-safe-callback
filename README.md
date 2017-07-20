@@ -1,5 +1,6 @@
 # Napi Thread-Safe Callback
 
+[![npm](https://img.shields.io/npm/v/napi-thread-safe-callback.svg)](https://www.npmjs.com/package/napi-thread-safe-callback)
 [![Build Status](https://travis-ci.org/mika-fischer/napi-thread-safe-callback.svg?branch=master)](https://travis-ci.org/mika-fischer/napi-thread-safe-callback)
 [![Build status](https://ci.appveyor.com/api/projects/status/475okhfy85tkeah7?svg=true)](https://ci.appveyor.com/project/mika-fischer/napi-thread-safe-callback)
 [![dependencies Status](https://david-dm.org/mika-fischer/napi-thread-safe-callback/status.svg?style=flat)](https://david-dm.org/mika-fischer/napi-thread-safe-callback)
