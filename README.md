@@ -1,5 +1,7 @@
 # Napi Thread-Safe Callback
 
+[![Build Status](https://travis-ci.org/mika-fischer/napi-thread-safe-callback.svg?branch=master)](https://travis-ci.org/mika-fischer/napi-thread-safe-callback)
+
 This package contains a header-only C++ helper class to facilitate
 calling back into JavaScript from threads other than the Node.JS main thread
 
