@@ -1,10 +1,22 @@
 environment:
   matrix:
     - GYP_MSVS_VERSION: 2015
+      nodejs_version: "8"
+
+    - GYP_MSVS_VERSION: 2015
+      nodejs_version: "7"
+
+    - GYP_MSVS_VERSION: 2015
+      nodejs_version: "6"
+
     - GYP_MSVS_VERSION: 2017
-    - nodejs_version: "8"
-    - nodejs_version: "7"
-    - nodejs_version: "6"
+      nodejs_version: "8"
+
+    - GYP_MSVS_VERSION: 2017
+      nodejs_version: "7"
+
+    - GYP_MSVS_VERSION: 2017
+      nodejs_version: "6"
 
 platform:
   - x86
