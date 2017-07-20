@@ -32,3 +32,5 @@ test_script:
   - npm test
 
 build: off
+
+version: "{build}"
