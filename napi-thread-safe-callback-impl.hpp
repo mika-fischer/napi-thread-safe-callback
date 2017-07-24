@@ -87,7 +87,7 @@ class ThreadSafeCallback::Impl
                     if (function_pair.second)
                         function_pair.second(result, error);
                     else if (!error.IsEmpty())
-                        throw error;
+                        throw std::runtime_error(error.Message());
                 }
             }
 
