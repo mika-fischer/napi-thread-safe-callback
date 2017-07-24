@@ -66,6 +66,7 @@ class ThreadSafeCallback
         // - ignore result, terminate on error
         void call();
         void call(arg_func_t arg_function);
+        void callError(const std::string& message);
         
     protected:
         // Cannot be copied or assigned

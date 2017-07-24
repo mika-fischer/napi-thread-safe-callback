@@ -273,3 +273,8 @@ inline void ThreadSafeCallback::call(arg_func_t arg_function)
 {
     operator()(arg_function, nullptr);
 }
+
+inline void ThreadSafeCallback::callError(const std::string& message)
+{
+    error(message, nullptr);
+}
