@@ -53,19 +53,19 @@ describe('napi-thread-safe-callback.hpp', function () {
         it('should fail when first argument is boolean', function () {
             assert.throws(() => tests.constructor2(false, () => {}), /Callback receiver must be an object or function/);
         });
-        it('should succeed when first argument is number', function () {
+        it('should fail when first argument is number', function () {
             assert.throws(() => tests.constructor2(0, () => {}), /Callback receiver must be an object or function/);
         });
-        it('should succeed when first argument is string', function () {
+        it('should fail when first argument is string', function () {
             assert.throws(() => tests.constructor2('foo', () => {}), /Callback receiver must be an object or function/);
         });
-        it('should succeed when first argument is symbol', function () {
+        it('should fail when first argument is symbol', function () {
             assert.throws(() => tests.constructor2(Symbol(), () => {}), /Callback receiver must be an object or function/);
         });
         it('should succeed when first argument is object', function () {
             assert.doesNotThrow(() => tests.constructor2({}, () => {}));
         });
-        it('should fail when first agument is function', function () {
+        it('should succeed when first agument is function', function () {
             assert.doesNotThrow(() => tests.constructor(() => {}, () => {}));
         })
     })
