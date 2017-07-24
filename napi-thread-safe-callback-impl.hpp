@@ -38,9 +38,15 @@ class ThreadSafeCallback::Impl
             {
                 static_cast<Impl *>(handle->data)->async_callback();
             }
+            catch (std::exception& e)
+            {
+                std::cout << "ERROR: " << e.what() << std::endl;
+                // TODO: napi fatal error
+                std::terminate();
+            }
             catch (...) 
             {
-                std::cout << "ERROR: Exception" << std::endl;
+                std::cout << "ERROR: Unknown exception" << std::endl;
                 // TODO: napi fatal error
                 std::terminate();
             }
