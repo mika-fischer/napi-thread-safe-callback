@@ -31,9 +31,9 @@ class ThreadSafeCallback
 
         // Must be called from Node event loop because it calls napi_create_reference and uv_async_init
         ThreadSafeCallback(const Napi::Function& callback);
-        ThreadSafeCallback(const Napi::Object& receiver, const Napi::Function& callback);
+        ThreadSafeCallback(const Napi::Value& receiver, const Napi::Function& callback);
         ThreadSafeCallback(Napi::FunctionReference&& callback);
-        ThreadSafeCallback(Napi::ObjectReference&& receiver, Napi::FunctionReference&& callback);
+        ThreadSafeCallback(Napi::Reference<Napi::Value>&& receiver, Napi::FunctionReference&& callback);
 
         // All other member functions can be called from any thread, including move constructor and destructor
         ThreadSafeCallback(ThreadSafeCallback&& other);
