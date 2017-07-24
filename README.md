@@ -7,7 +7,45 @@
 [![devDependencies Status](https://david-dm.org/mika-fischer/napi-thread-safe-callback/dev-status.svg?style=flat)](https://david-dm.org/mika-fischer/napi-thread-safe-callback?type=dev)
 
 This package contains a header-only C++ helper class to facilitate
-calling back into JavaScript from threads other than the Node.JS main thread
+calling back into JavaScript from threads other than the Node.JS main thread.
+
+# Examples
+
+## Perform async work in new thread and call back with result/error
+```C++
+void example_async_work(const CallbackInfo& info)
+{
+    // Capture callback in main thread
+    auto callback = std::make_shared<ThreadSafeCallback>(info[0].As<Function>());
+    bool fail = info.Length() > 1;
+
+    // Pass callback to other thread
+    std::thread([callback, fail]
+    {
+        try
+        {
+            // Do some work to get a result
+            if (fail)
+                throw std::runtime_error("Failure during async work");
+            std::string result = "foo";
+
+            // Call back with result
+            callback->call([result](Napi::Env env, std::vector<napi_value>& args)
+            {
+                // This will run in main thread and needs to construct the
+                // arguments for the call
+                args.push_back(env.Undefined());
+                args.push_back(Napi::String::New(env, result));
+            });
+        }
+        catch (std::exception& e)
+        {
+            // Call back with error
+            callback->callError(e.what());
+        }
+    }).detach();
+}
+```
 
 ## Usage
 
