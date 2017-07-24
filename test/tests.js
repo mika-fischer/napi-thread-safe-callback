@@ -102,7 +102,35 @@ describe('napi-thread-safe-callback.hpp', function () {
         });
     });
 
-    describe('ThreadSafeCallback::call(arg_func)', function () {
+    describe('ThreadSafeCallback::call(arg_func) with callback', function () {
+        it('should call callback with one undefined argument', function (done) {
+            tests.call_args(function (arg) {
+                assert(arguments.length === 1);
+                assert(arg === undefined);
+                done();
+            }, undefined);
+        });
+        it('should call callback with one null argument', function (done) {
+            tests.call_args(function (arg) {
+                assert(arguments.length === 1);
+                assert(arg === null);
+                done();
+            }, null);
+        });
+        it('should call callback with one boolean argument', function (done) {
+            tests.call_args(function (arg) {
+                assert(arguments.length === 1);
+                assert(arg === true);
+                done();
+            }, true);
+        });
+        it('should call callback with one number argument', function (done) {
+            tests.call_args(function (arg) {
+                assert(arguments.length === 1);
+                assert(arg === 42);
+                done();
+            }, 42);
+        });
         it('should call callback with one string argument', function (done) {
             tests.call_args(function (arg) {
                 assert(arguments.length === 1);
@@ -110,6 +138,74 @@ describe('napi-thread-safe-callback.hpp', function () {
                 done();
             }, 'foo');
         });
+        it('should call callback with one symbol argument', function (done) {
+            const sym = Symbol();
+            tests.call_args(function (arg) {
+                assert(arguments.length === 1);
+                assert(arg === sym);
+                done();
+            }, sym);
+        });
+        it('should call callback with one object argument', function (done) {
+            tests.call_args(function (arg) {
+                assert(arguments.length === 1);
+                assert(arg.foo === 'bar');
+                done();
+            }, {foo: 'bar'});
+        });
+        it('should call callback with one function argument', function (done) {
+            tests.call_args(function (arg) {
+                try {
+                    assert.equal(arguments.length, 1);
+                    assert.equal(arg(), 'bar');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            }, () => 'bar');
+        });
     });
 
+    describe('ThreadSafeCallback::callError(message) with callback', function () {
+        it('should call callback with error', function (done) {
+            tests.call_error(function (err) {
+                try {
+                    assert.equal(arguments.length, 1);
+                    assert(err instanceof Error);
+                    assert.equal(err.message, 'foo');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            })    
+        });
+    });
+
+    describe('example_async_work', function () {
+        it('should call callback with result', function (done) {
+            tests.example_async_work(function (err, arg) {
+                try {
+                    assert.equal(arguments.length, 2);
+                    assert.equal(err, undefined);
+                    assert.equal(arg, 'foo');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+    
+        it('should call callback with error', function (done) {
+            tests.example_async_work(function (err) {
+                try {
+                    assert.equal(arguments.length, 1);
+                    assert(err instanceof Error);
+                    assert.equal(err.message, 'Failure during async work');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            }, 'fail');
+        });
+    });
 });

@@ -3,13 +3,6 @@
 
 using namespace Napi;
 
-std::string stringify(const Value& value)
-{
-    auto JSON = value.Env().Global().Get("JSON").As<Napi::Object>();
-    auto stringify = JSON.Get("stringify").As<Napi::Function>();
-    return stringify.Call(JSON, {value}).As<Napi::String>().Utf8Value();
-}
-
 void constructor(const CallbackInfo& info)
 {
     ThreadSafeCallback(info[0].As<Function>());
@@ -43,19 +36,64 @@ void call2(const CallbackInfo& info)
 void call_args(const CallbackInfo& info)
 {
     auto callback = std::make_shared<ThreadSafeCallback>(info[0].As<Function>());
-    std::vector<std::string> json_args;
+    auto stored_args = std::make_shared<std::vector<Napi::Reference<Napi::Value>>>();
     for (size_t i=1; i<info.Length(); ++i)
-        json_args.push_back(stringify(info[i]));
-    std::thread([callback, json_args]
+        stored_args->push_back(Napi::Persistent(info[i]));
+    std::thread([callback, stored_args]
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        callback->call([json_args](Napi::Env env, std::vector<napi_value>& args)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        callback->call([stored_args](Napi::Env env, std::vector<napi_value>& args)
         {
-            auto JSON = env.Global().Get("JSON").As<Napi::Object>();
-            auto parse = JSON.Get("parse").As<Napi::Function>();
-            for (const auto& json_arg : json_args)
-                args.push_back(parse.Call(JSON, {String::New(env, json_arg)}));
+            for (const auto& arg : *stored_args)
+                args.push_back(arg.Value());
         });
+    }).detach();
+}
+
+void call_error(const CallbackInfo& info)
+{
+    auto callback = std::make_shared<ThreadSafeCallback>(info[0].As<Function>());
+    std::thread([callback]
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        // callback->callError("foo");
+        callback->call([](napi_env env, std::vector<napi_value>& args)
+        {
+            args.push_back(Napi::Error::New(env, "foo").Value());
+        });
+    }).detach();
+}
+
+void example_async_work(const CallbackInfo& info)
+{
+    // Capture callback in main thread
+    auto callback = std::make_shared<ThreadSafeCallback>(info[0].As<Function>());
+    bool fail = info.Length() > 1;
+
+    // Pass callback to other thread
+    std::thread([callback, fail]
+    {
+        try
+        {
+            // Do some work to get a result
+            if (fail)
+                throw std::runtime_error("Failure during async work");
+            std::string result = "foo";
+
+            // Call back with result
+            callback->call([result](Napi::Env env, std::vector<napi_value>& args)
+            {
+                // This will run in main thread and needs to construct the
+                // arguments for the call
+                args.push_back(env.Undefined());
+                args.push_back(Napi::String::New(env, result));
+            });
+        }
+        catch (std::exception& e)
+        {
+            // Call back with error
+            callback->callError(e.what());
+        }
     }).detach();
 }
 
@@ -69,6 +107,8 @@ void init(Env env, Object exports, Object module)
     ADD_TEST(call);
     ADD_TEST(call2);
     ADD_TEST(call_args);
+    ADD_TEST(call_error);
+    ADD_TEST(example_async_work);
 }
 
 NODE_API_MODULE(tests, init);
