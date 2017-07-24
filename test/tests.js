@@ -4,7 +4,7 @@ const tests = require('./build/Debug/tests');
 describe('napi-thread-safe-callback.hpp', function () {
 
     it('should load tests module', function () {
-        assert(tests !== undefined);
+        assert.notStrictEqual(tests, undefined);
     });
 
     describe('ThreadSafeCallback::ThreadSafeCallback(callback)', function () {
@@ -89,15 +89,23 @@ describe('napi-thread-safe-callback.hpp', function () {
         it('should call callback with object receiver', function (done) {
             const receiver = {foo: 'bar'}
             tests.call2(receiver, function () {
-                assert(this.foo === 'bar');
-                done();
+                try {
+                    assert.strictEqual(this.foo, 'bar');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             });
         });
         it('should call callback with function receiver', function (done) {
             const receiver = () => 'bar';
             tests.call2(receiver, function () {
-                assert(this() === 'bar');
-                done();
+                try {
+                    assert.strictEqual(this(), 'bar');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             });
         });
     });
@@ -105,59 +113,87 @@ describe('napi-thread-safe-callback.hpp', function () {
     describe('ThreadSafeCallback::call(arg_func) with callback', function () {
         it('should call callback with one undefined argument', function (done) {
             tests.call_args(function (arg) {
-                assert(arguments.length === 1);
-                assert(arg === undefined);
-                done();
+                try {
+                    assert.strictEqual(arguments.length, 1);
+                    assert.strictEqual(arg, undefined);
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             }, undefined);
         });
         it('should call callback with one null argument', function (done) {
             tests.call_args(function (arg) {
-                assert(arguments.length === 1);
-                assert(arg === null);
-                done();
+                try {
+                    assert.strictEqual(arguments.length, 1);
+                    assert.strictEqual(arg, null);
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             }, null);
         });
         it('should call callback with one boolean argument', function (done) {
             tests.call_args(function (arg) {
-                assert(arguments.length === 1);
-                assert(arg === true);
+                try {
+                    assert.strictEqual(arguments.length, 1);
+                    assert.strictEqual(arg, true);
                 done();
+                } catch (err) {
+                    done(err);
+                }
             }, true);
         });
         it('should call callback with one number argument', function (done) {
             tests.call_args(function (arg) {
-                assert(arguments.length === 1);
-                assert(arg === 42);
-                done();
+                try {
+                    assert.strictEqual(arguments.length, 1);
+                    assert.strictEqual(arg, 42);
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             }, 42);
         });
         it('should call callback with one string argument', function (done) {
             tests.call_args(function (arg) {
-                assert(arguments.length === 1);
-                assert(arg === 'foo');
-                done();
+                try {
+                    assert(arguments.length, 1);
+                    assert(arg, 'foo');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             }, 'foo');
         });
         it('should call callback with one symbol argument', function (done) {
             const sym = Symbol();
             tests.call_args(function (arg) {
-                assert(arguments.length === 1);
-                assert(arg === sym);
-                done();
+                try {
+                    assert(arguments.length, 1);
+                    assert(arg, sym);
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             }, sym);
         });
         it('should call callback with one object argument', function (done) {
             tests.call_args(function (arg) {
-                assert(arguments.length === 1);
-                assert(arg.foo === 'bar');
-                done();
+                try {
+                    assert.strictEqual(arguments.length, 1);
+                    assert.strictEqual(arg.foo, 'bar');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
             }, {foo: 'bar'});
         });
         it('should call callback with one function argument', function (done) {
             tests.call_args(function (arg) {
                 try {
-                    assert.equal(arguments.length, 1);
-                    assert.equal(arg(), 'bar');
+                    assert.strictEqual(arguments.length, 1);
+                    assert.strictEqual(arg(), 'bar');
                     done();
                 } catch (err) {
                     done(err);
@@ -170,9 +206,9 @@ describe('napi-thread-safe-callback.hpp', function () {
         it('should call callback with error', function (done) {
             tests.call_error(function (err) {
                 try {
-                    assert.equal(arguments.length, 1);
+                    assert.strictEqual(arguments.length, 1);
                     assert(err instanceof Error);
-                    assert.equal(err.message, 'foo');
+                    assert.strictEqual(err.message, 'foo');
                     done();
                 } catch (err) {
                     done(err);
@@ -185,9 +221,9 @@ describe('napi-thread-safe-callback.hpp', function () {
         it('should call callback with result', function (done) {
             tests.example_async_work(function (err, arg) {
                 try {
-                    assert.equal(arguments.length, 2);
-                    assert.equal(err, undefined);
-                    assert.equal(arg, 'foo');
+                    assert.strictEqual(arguments.length, 2);
+                    assert.strictEqual(err, undefined);
+                    assert.strictEqual(arg, 'foo');
                     done();
                 } catch (err) {
                     done(err);
@@ -198,9 +234,9 @@ describe('napi-thread-safe-callback.hpp', function () {
         it('should call callback with error', function (done) {
             tests.example_async_work(function (err) {
                 try {
-                    assert.equal(arguments.length, 1);
+                    assert.strictEqual(arguments.length, 1);
                     assert(err instanceof Error);
-                    assert.equal(err.message, 'Failure during async work');
+                    assert.strictEqual(err.message, 'Failure during async work');
                     done();
                 } catch (err) {
                     done(err);
