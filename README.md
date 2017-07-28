@@ -46,6 +46,58 @@ void example_async_work(const CallbackInfo& info)
 }
 ```
 
+## Perform async work in new thread, call back with result/error and check return value
+```C++
+void example_async_return_value(const CallbackInfo& info)
+{
+    auto callback = std::make_shared<ThreadSafeCallback>(info[0].As<Function>());
+    std::thread([callback]
+    {
+        try
+        {
+            int result = 0;
+            while (true)
+            {
+                // Do some work...
+                try
+                {
+                    result += 1;
+                    if (result > 20)
+                        throw std::runtime_error("Failure during async work");
+                }
+                catch (std::exception &e)
+                {
+                    // Call back with error
+                    // Note that this will cause the thread to exit and the
+                    // ThreadSafeCallback to be destroyed. But the callback
+                    // will still be called, even afterwards
+                    callback->callError(e.what());
+                    throw;
+                }
+                // Call back into Javascript with current result
+                auto future = callback->call<bool>(
+                    [result](Env env, std::vector<napi_value> &args) {
+                        args = {env.Undefined(), Number::New(env, result)};
+                    },
+                    [](const Value &val) {
+                        return val.As<Boolean>().Value();
+                    });
+                // This blocks until the JS call has returned a value
+                // In case the callback throws we just let the exception
+                // bubble up and end the thread
+                auto continue_running = future.get();
+                if (!continue_running)
+                    break;
+            }
+        }
+        catch (...) 
+        {
+            // Ignore errors
+        }
+    }).detach();
+}
+```
+
 ## Usage
 
   1. Add a dependency on this package to `package.json`:
@@ -63,8 +115,6 @@ void example_async_work(const CallbackInfo& info)
 ```C++
 #include "napi-thread-safe-callback.hpp"
 ```
-
-  4. Use the class - TODO
 
 ### Exception handling
 

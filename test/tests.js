@@ -244,4 +244,56 @@ describe('napi-thread-safe-callback.hpp', function () {
             }, 'fail');
         });
     });
+
+    describe('example_async_return_value', function () {
+        it('should call callback with increasing integers until callback returns false', function (done) {
+            let count = 1;
+            tests.example_async_return_value(function (err, arg) {
+                try {
+                    assert.strictEqual(arguments.length, 2);
+                    assert.strictEqual(err, undefined);
+                    assert.strictEqual(arg, count);
+                    if (count < 10) {
+                        count += 1;
+                        return true;
+                    } else {
+                        done();
+                        return false;
+                    }
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+
+        it('should call callback with increasing integers up to 20 and then return an error', function (done) {
+            let count = 1;
+            tests.example_async_return_value(function (err, arg) {
+                try {
+                    if (count <= 20) {
+                        assert.strictEqual(arguments.length, 2);
+                        assert.strictEqual(err, undefined);
+                        assert.strictEqual(arg, count);
+                        count += 1;
+                        return true;
+                    } else {
+                        assert.strictEqual(arguments.length, 1);
+                        assert(err instanceof Error);
+                        assert.strictEqual(err.message, 'Failure during async work');
+                        done();
+                        return false;
+                    }
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+
+        it('should survive callback throwing an exception', function (done) {
+            tests.example_async_return_value(function (err, arg) {
+                setTimeout(done, 10);
+                throw new Error('JS exception');
+            });
+        });
+    });
 });
