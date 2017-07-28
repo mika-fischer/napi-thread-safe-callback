@@ -34,8 +34,7 @@ void example_async_work(const CallbackInfo& info)
             {
                 // This will run in main thread and needs to construct the
                 // arguments for the call
-                args.push_back(env.Undefined());
-                args.push_back(Napi::String::New(env, result));
+                args = { env.Undefined(), Napi::String::New(env, result) };
             });
         }
         catch (std::exception& e)
