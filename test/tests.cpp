@@ -36,13 +36,13 @@ void call2(const CallbackInfo& info)
 void call_args(const CallbackInfo& info)
 {
     auto callback = std::make_shared<ThreadSafeCallback>(info[0].As<Function>());
-    auto stored_args = std::make_shared<std::vector<Napi::Reference<Napi::Value>>>();
+    auto stored_args = std::make_shared<std::vector<Reference<Value>>>();
     for (size_t i=1; i<info.Length(); ++i)
-        stored_args->push_back(Napi::Persistent(info[i]));
+        stored_args->push_back(Persistent(info[i]));
     std::thread([callback, stored_args]
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        callback->call([stored_args](Napi::Env env, std::vector<napi_value>& args)
+        callback->call([stored_args](Env env, std::vector<napi_value>& args)
         {
             for (const auto& arg : *stored_args)
                 args.push_back(arg.Value());
@@ -59,7 +59,7 @@ void call_error(const CallbackInfo& info)
         // callback->callError("foo");
         callback->call([](napi_env env, std::vector<napi_value>& args)
         {
-            args = { Napi::Error::New(env, "foo").Value() };
+            args = { Error::New(env, "foo").Value() };
         });
     }).detach();
 }
@@ -81,11 +81,11 @@ void example_async_work(const CallbackInfo& info)
             std::string result = "foo";
 
             // Call back with result
-            callback->call([result](Napi::Env env, std::vector<napi_value>& args)
+            callback->call([result](Env env, std::vector<napi_value>& args)
             {
                 // This will run in main thread and needs to construct the
                 // arguments for the call
-                args = { env.Undefined(), Napi::String::New(env, result) };
+                args = { env.Undefined(), String::New(env, result) };
             });
         }
         catch (std::exception& e)
