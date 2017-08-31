@@ -24,6 +24,6 @@
   "devDependencies": {
     "cross-env": "^5.0.1",
     "mocha": "^3.4.2",
-    "node-addon-api": "^0.4.0"
+    "node-addon-api": "^0.5.1"
   }
 }
