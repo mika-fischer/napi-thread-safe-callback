@@ -42,15 +42,11 @@ class ThreadSafeCallback::Impl
             }
             catch (std::exception& e)
             {
-                std::cout << "ERROR: " << e.what() << std::endl;
-                // TODO: napi fatal error
-                std::terminate();
+                Napi::Error::Fatal("", e.what());
             }
             catch (...) 
             {
-                std::cout << "ERROR: Unknown exception" << std::endl;
-                // TODO: napi fatal error
-                std::terminate();
+                Napi::Error::Fatal("", "ERROR: Unknown exception during async callback");
             }
         }
 
@@ -171,8 +167,7 @@ inline std::future<void> ThreadSafeCallback::operator()(arg_func_t arg_function)
             }
             catch (...)
             {
-                // TODO: napi fatal error
-                std::terminate();
+                Napi::Error::Fatal("", "Unable to set exception on promise");
             }
         }
     });
@@ -256,8 +251,7 @@ inline std::future<T> ThreadSafeCallback::call(arg_func_t arg_function, std::fun
             }
             catch (...)
             {
-                // TODO: napi fatal error
-                std::terminate();
+                Napi::Error::Fatal("", "Unable to set exception on promise");
             }
         }
     });
