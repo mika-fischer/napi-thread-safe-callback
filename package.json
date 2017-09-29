@@ -8,7 +8,7 @@
     "test-build": "node-gyp build --directory test --debug",
     "test-configure": "node-gyp configure --directory test --debug",
     "test-rebuild": "node-gyp rebuild --directory test --debug",
-    "test-run": "cross-env NODE_OPTIONS=--napi-modules mocha --reporter spec"
+    "test-run": "mocha --reporter spec"
   },
   "keywords": [
     "napi",
@@ -22,7 +22,6 @@
   "bugs": "https://github.com/mika-fischer/napi-thread-safe-callback/issues",
   "repository": "github:mika-fischer/napi-thread-safe-callback",
   "devDependencies": {
-    "cross-env": "^5.0.5",
     "mocha": "^3.5.0",
     "node-addon-api": "^1.0.0"
   }
