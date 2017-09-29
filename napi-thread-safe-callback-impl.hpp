@@ -106,25 +106,17 @@ class ThreadSafeCallback::Impl
 // public API
 
 inline ThreadSafeCallback::ThreadSafeCallback(const Napi::Function &callback)
-    : ThreadSafeCallback(Napi::Persistent(callback))
+    : ThreadSafeCallback(Napi::Value(), callback)
 {}
 
 inline ThreadSafeCallback::ThreadSafeCallback(const Napi::Value& receiver, const Napi::Function& callback)
-    : ThreadSafeCallback(Napi::Persistent(receiver), Napi::Persistent(callback))
-{}
-
-inline ThreadSafeCallback::ThreadSafeCallback(Napi::FunctionReference&& callback)
-    : ThreadSafeCallback(Napi::Reference<Napi::Value>(), std::move(callback))
-{}
-
-inline ThreadSafeCallback::ThreadSafeCallback(Napi::Reference<Napi::Value>&& receiver, Napi::FunctionReference&& callback)
     : impl(nullptr)
 {
-    if (!receiver.IsEmpty() && !(receiver.Value().IsObject() || receiver.Value().IsFunction()))
+    if (!receiver.IsEmpty() && !(receiver.IsObject() || receiver.IsFunction()))
         throw Napi::Error::New(callback.Env(), "Callback receiver must be an object or function");
-    if (callback.IsEmpty() || !callback.Value().IsFunction())
+    if (!callback.IsFunction())
         throw Napi::Error::New(callback.Env(), "Callback must be a function");
-    impl = new Impl(std::move(receiver), std::move(callback));
+    impl = new Impl(Napi::Persistent(receiver), Napi::Persistent(callback));
 }
 
 inline ThreadSafeCallback::ThreadSafeCallback(ThreadSafeCallback&& other)

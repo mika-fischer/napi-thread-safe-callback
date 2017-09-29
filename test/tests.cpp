@@ -36,16 +36,18 @@ void call2(const CallbackInfo& info)
 void call_args(const CallbackInfo& info)
 {
     auto callback = std::make_shared<ThreadSafeCallback>(info[0].As<Function>());
-    auto stored_args = std::make_shared<std::vector<Reference<Value>>>();
+    auto args = Array::New(info.Env());
     for (size_t i=1; i<info.Length(); ++i)
-        stored_args->push_back(Persistent(info[i]));
+        args[i-1] = info[i];
+    auto stored_args = std::make_shared<Reference<Array>>(Persistent(args));
     std::thread([callback, stored_args]
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
         callback->call([stored_args](Env env, std::vector<napi_value>& args)
         {
-            for (const auto& arg : *stored_args)
-                args.push_back(arg.Value());
+            auto arguments = stored_args->Value().As<Array>();
+            for (uint32_t i=0; i<arguments.Length(); ++i)
+                args.push_back(Value(arguments[i]));
         });
     }).detach();
 }
@@ -148,7 +150,7 @@ void example_async_return_value(const CallbackInfo& info)
 #define ADD_TEST(name) \
     exports[#name] = Function::New(env, name, #name);
 
-void init(Env env, Object exports, Object module)
+Object init(Env env, Object exports)
 {
     ADD_TEST(constructor);
     ADD_TEST(constructor2);
@@ -158,6 +160,7 @@ void init(Env env, Object exports, Object module)
     ADD_TEST(call_error);
     ADD_TEST(example_async_work);
     ADD_TEST(example_async_return_value);
+    return exports;
 }
 
 NODE_API_MODULE(tests, init);
