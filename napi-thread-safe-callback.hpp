@@ -33,6 +33,9 @@ class ThreadSafeCallback
         ThreadSafeCallback(const Napi::Function& callback);
         ThreadSafeCallback(const Napi::Value& receiver, const Napi::Function& callback);
 
+        // Must be called from Node event loop because it calls uv_unref
+        void unref();
+
         // All other member functions can be called from any thread, including move constructor and destructor
         ThreadSafeCallback(ThreadSafeCallback&& other);
         ~ThreadSafeCallback();

@@ -17,6 +17,11 @@ class ThreadSafeCallback::Impl
             handle_.data = this;
         }
 
+        void unref()
+        {
+            uv_unref(reinterpret_cast<uv_handle_t *>(&handle_));
+        }
+
         void call(arg_func_t arg_function, completion_func_t completion_function)
         {
             std::lock_guard<std::mutex> lock(mutex_);
@@ -117,6 +122,11 @@ inline ThreadSafeCallback::ThreadSafeCallback(const Napi::Value& receiver, const
     if (!callback.IsFunction())
         throw Napi::Error::New(callback.Env(), "Callback must be a function");
     impl = new Impl(Napi::Persistent(receiver), Napi::Persistent(callback));
+}
+
+void ThreadSafeCallback::unref()
+{
+    impl->unref();
 }
 
 inline ThreadSafeCallback::ThreadSafeCallback(ThreadSafeCallback&& other)
