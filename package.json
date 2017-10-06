@@ -1,6 +1,6 @@
 {
   "name": "napi-thread-safe-callback",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "C++ utility class to perform callbacks into JavaScript from any thread",
   "main": "index.js",
   "scripts": {
