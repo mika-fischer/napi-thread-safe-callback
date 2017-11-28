@@ -22,7 +22,7 @@
   "bugs": "https://github.com/mika-fischer/napi-thread-safe-callback/issues",
   "repository": "github:mika-fischer/napi-thread-safe-callback",
   "devDependencies": {
-    "mocha": "^3.5.0",
-    "node-addon-api": "^1.0.0"
+    "mocha": "^4.0.1",
+    "node-addon-api": "^1.1.0"
   }
 }
