@@ -24,9 +24,34 @@ class ThreadSafeCallback::Impl
 
         void call(arg_func_t arg_function, completion_func_t completion_function)
         {
+          auto cur_th = std::this_thread::get_id();
+          if (node_th_ ==cur_th)
+          {
+            auto env = callback_.Env();
+            Napi::Value result(env, nullptr);
+            Napi::Error error(env, nullptr);
+            Napi::HandleScope scope(env);
+            std::vector<napi_value> args;
+            try
+            {
+              arg_function(env, args);
+              result = callback_.MakeCallback(receiver_.Value(), args);
+            }
+            catch (Napi::Error& err)
+            {
+              error = std::move(err);
+            }
+            if (completion_function)
+              completion_function(result, error);
+            else if (!error.IsEmpty())
+              throw std::runtime_error(error.Message());
+          }
+          else {
             std::lock_guard<std::mutex> lock(mutex_);
             function_pairs_.push_back({arg_function, completion_function});
             uv_async_send(&handle_);
+          }
+            
         }
 
         void close()
@@ -102,7 +127,7 @@ class ThreadSafeCallback::Impl
         Napi::FunctionReference      callback_;
 
         uv_async_t                   handle_;
-
+        std::thread::id node_th_;
         std::mutex                   mutex_;
         std::vector<func_pair_t>     function_pairs_;
         bool                         close_;
@@ -124,7 +149,7 @@ inline ThreadSafeCallback::ThreadSafeCallback(const Napi::Value& receiver, const
     impl = new Impl(Napi::Persistent(receiver), Napi::Persistent(callback));
 }
 
-void ThreadSafeCallback::unref()
+inline void ThreadSafeCallback::unref()
 {
     impl->unref();
 }
