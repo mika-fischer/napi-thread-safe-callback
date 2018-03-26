@@ -296,4 +296,29 @@ describe('napi-thread-safe-callback.hpp', function () {
             });
         });
     });
+
+    describe('Lots of callbacks during sync work (#5)', function () {
+        it('should not crash', function (done) {
+            tests.lots_of_callbacks(function (err, arg) {
+                try {
+                    assert.strictEqual(arguments.length, 2);
+                    assert.strictEqual(err, undefined);
+                    if (arg === 0) {
+                        // console.log(new Date(), 'First callback');
+                    }
+                    if (arg >= 9999) {
+                        // console.log(new Date(), 'Last callback');
+                        done();
+                    }
+                } catch (err) {
+                    done(err);
+                }
+            });
+            // Block event loop with sync work
+            // console.log(new Date(), 'Starting sync work...');
+            const t_start = process.hrtime();
+            while (process.hrtime(t_start)[1] < 500 * 1000 * 1000);
+            // console.log(new Date(), 'Sync work finished');
+        });
+    });
 });
