@@ -169,6 +169,14 @@ void lots_of_callbacks(const CallbackInfo& info)
     }).detach();
 }
 
+void call_from_main_thread(const CallbackInfo& info)
+{
+    auto callback = std::make_shared<ThreadSafeCallback>(info[0].As<Function>());
+    callback->call([](Env env, std::vector<napi_value> &args) {
+        args = {env.Undefined()};
+    });
+}
+
 #define ADD_TEST(name) \
     exports[#name] = Function::New(env, name, #name);
 
@@ -183,6 +191,7 @@ Object init(Env env, Object exports)
     ADD_TEST(example_async_work);
     ADD_TEST(example_async_return_value);
     ADD_TEST(lots_of_callbacks);
+    ADD_TEST(call_from_main_thread);
     return exports;
 }
 

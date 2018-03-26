@@ -321,4 +321,18 @@ describe('napi-thread-safe-callback.hpp', function () {
             // console.log(new Date(), 'Sync work finished');
         });
     });
+
+    describe('Calling callback from main thread (#4)', function () {
+        it('should not deadlock', function (done) {
+            tests.call_from_main_thread(function (err, arg) {
+                try {
+                    assert.strictEqual(arguments.length, 1);
+                    assert.strictEqual(err, undefined);
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+    });
 });
