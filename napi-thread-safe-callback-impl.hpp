@@ -124,7 +124,7 @@ inline ThreadSafeCallback::ThreadSafeCallback(const Napi::Value& receiver, const
     impl = new Impl(Napi::Persistent(receiver), Napi::Persistent(callback));
 }
 
-void ThreadSafeCallback::unref()
+inline void ThreadSafeCallback::unref()
 {
     impl->unref();
 }
