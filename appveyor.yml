@@ -1,6 +1,9 @@
 environment:
   matrix:
     - GYP_MSVS_VERSION: 2015
+      nodejs_version: "10"
+
+    - GYP_MSVS_VERSION: 2015
       nodejs_version: "9"
 
     - GYP_MSVS_VERSION: 2015
