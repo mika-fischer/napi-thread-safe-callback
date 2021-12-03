@@ -5,6 +5,7 @@
 #include <future>
 #include <string>
 #include <vector>
+#include <exception>
 
 #ifndef NAPI_CPP_EXCEPTIONS
 #error ThreadSafeCallback needs napi exception support
@@ -28,6 +29,11 @@ class ThreadSafeCallback
         using completion_func_t = std::function<void(const Napi::Value&, const Napi::Error&)>;
 
         // Both functions will be called within the same HandleScope
+
+        // The argument function may throw CancelException to cancel the call
+        class CancelException : public std::exception {
+            const char* what() const throw();
+        };
 
         // Must be called from Node event loop because it calls napi_create_reference and uv_async_init
         ThreadSafeCallback(const Napi::Function& callback);
@@ -68,7 +74,7 @@ class ThreadSafeCallback
         void call();
         void call(arg_func_t arg_function);
         void callError(const std::string& message);
-        
+
     protected:
         // Cannot be copied or assigned
         ThreadSafeCallback(const ThreadSafeCallback&) = delete;

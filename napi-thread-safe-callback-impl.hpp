@@ -49,7 +49,7 @@ class ThreadSafeCallback::Impl
             {
                 Napi::Error::Fatal("", e.what());
             }
-            catch (...) 
+            catch (...)
             {
                 Napi::Error::Fatal("", "ERROR: Unknown exception during async callback");
             }
@@ -74,7 +74,16 @@ class ThreadSafeCallback::Impl
                     Napi::HandleScope scope(env);
                     std::vector<napi_value> args;
                     if (function_pair.first)
-                        function_pair.first(env, args);
+                    {
+                        try
+                        {
+                            function_pair.first(env, args);
+                        }
+                        catch (CancelException &)
+                        {
+                            continue;
+                        }
+                    }
                     Napi::Value result(env, nullptr);
                     Napi::Error error(env, nullptr);
                     try
@@ -109,6 +118,10 @@ class ThreadSafeCallback::Impl
 };
 
 // public API
+
+inline const char* ThreadSafeCallback::CancelException::what() const throw() {
+    return "ThreadSafeCallback cancelled";
+}
 
 inline ThreadSafeCallback::ThreadSafeCallback(const Napi::Function &callback)
     : ThreadSafeCallback(Napi::Value(), callback)
@@ -179,7 +192,7 @@ inline std::future<void> ThreadSafeCallback::operator()(arg_func_t arg_function)
 inline std::future<void> ThreadSafeCallback::error(const std::string& message)
 {
     return operator()([message](napi_env env, std::vector<napi_value>& args) {
-        args.push_back(Napi::Error::New(env, message).Value());    
+        args.push_back(Napi::Error::New(env, message).Value());
     });
 }
 
@@ -199,7 +212,7 @@ inline void ThreadSafeCallback::operator()(arg_func_t arg_function, completion_f
 inline void ThreadSafeCallback::error(const std::string& message, completion_func_t completion_function)
 {
     operator()([message](napi_env env, std::vector<napi_value>& args) {
-        args.push_back(Napi::Error::New(env, message).Value());    
+        args.push_back(Napi::Error::New(env, message).Value());
     }, completion_function);
 }
 
