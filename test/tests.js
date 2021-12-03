@@ -213,7 +213,7 @@ describe('napi-thread-safe-callback.hpp', () => {
                 } catch (err) {
                     done(err);
                 }
-            })    
+            })
         });
     });
 
@@ -230,7 +230,7 @@ describe('napi-thread-safe-callback.hpp', () => {
                 }
             });
         });
-    
+
         it('should call callback with error', (done) => {
             tests.example_async_work((err, ...args) => {
                 try {
@@ -333,6 +333,13 @@ describe('napi-thread-safe-callback.hpp', () => {
                     done(err);
                 }
             });
+        });
+    });
+
+    describe('Throwing CancelError from argument callback', () => {
+        it('should not call callback', (done) => {
+            tests.call_cancel(() => done(new Error("called")))
+            setTimeout(done, 100);
         });
     });
 });

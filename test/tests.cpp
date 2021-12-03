@@ -1,6 +1,8 @@
 #include <napi.h>
 #include "napi-thread-safe-callback.hpp"
 
+#include <thread>
+
 using namespace Napi;
 
 void constructor(const CallbackInfo& info)
@@ -140,7 +142,7 @@ void example_async_return_value(const CallbackInfo& info)
                     break;
             }
         }
-        catch (...) 
+        catch (...)
         {
             // Ignore errors
         }
@@ -177,6 +179,19 @@ void call_from_main_thread(const CallbackInfo& info)
     });
 }
 
+void call_cancel(const CallbackInfo& info)
+{
+    auto callback = std::make_shared<ThreadSafeCallback>(info[0].As<Function>());
+    std::thread([callback]
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        callback->call([](napi_env env, std::vector<napi_value>& args)
+        {
+            throw ThreadSafeCallback::CancelException();
+        });
+    }).detach();
+}
+
 #define ADD_TEST(name) \
     exports[#name] = Function::New(env, name, #name);
 
@@ -192,6 +207,7 @@ Object init(Env env, Object exports)
     ADD_TEST(example_async_return_value);
     ADD_TEST(lots_of_callbacks);
     ADD_TEST(call_from_main_thread);
+    ADD_TEST(call_cancel);
     return exports;
 }
 
